@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wongnok - หน้าสมาชิก</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fdf7f2;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ff6600;
+      color: white;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: white;
+      color: #ff6600;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .main-content {
+      flex-grow: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .section {
+      display: none;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button.save {
+      margin-top: 15px;
+      background-color: #ff6600;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .recipe {
+      border-top: 1px solid #ddd;
+      padding: 15px 0;
+    }
+
+    .recipe img {
+      max-width: 100px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .actions {
+      margin-top: 10px;
+    }
+
+    .actions button {
+      margin-right: 10px;
+    }
+
+    .rating {
+      margin-top: 10px;
+    }
+
+    .rating span {
+      font-size: 24px;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    .rating span.selected {
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>WongNok</h2>
+    <button onclick="showSection('create')">สร้างเมนู</button>
+    <button onclick="showSection('history')">ประวัติเมนู</button>
+    <button onclick="showSection('search')">ค้นหาเมนู</button>
+  </div>
+  <div class="main-content">
+    <div id="create" class="section active">
+      <h2>เพิ่มเมนูอาหารของคุณ</h2>
+      <form id="addRecipeForm">
+        <label>ชื่อเมนู</label>
+        <input type="text" name="name" required>
+
+        <label>URL ของรูปอาหาร</label>
+        <input type="url" name="image" required>
+
+        <label>วัตถุดิบ</label>
+        <textarea name="ingredients" rows="3" required></textarea>
+
+        <label>ขั้นตอน</label>
+        <textarea name="steps" rows="4" required></textarea>
+
+        <label>ระยะเวลา</label>
+        <select name="time">
+          <option>5-10 นาที</option>
+          <option>11-30 นาที</option>
+          <option>31-60 นาที</option>
+          <option>60 นาทีขึ้นไป</option>
+        </select>
+
+        <label>ความยากง่ายของสูตร</label>
+        <select name="difficulty">
+          <option>ง่าย</option>
+          <option>ปานกลาง</option>
+          <option>ยาก</option>
+        </select>
+
+        <button type="submit" class="save">บันทึกเมนู</button>
+      </form>
+    </div>
+
+    <div id="history" class="section">
+      <h2>เมนูของฉัน</h2>
+      <div id="myRecipes"></div>
+    </div>
+
+    <div id="search" class="section">
+      <h2>ค้นหาเมนู</h2>
+      <input type="text" id="searchInput" placeholder="พิมพ์ชื่อเมนูที่ต้องการค้นหา...">
+      <select id="filterTime">
+        <option value="">-- เลือกเวลา --</option>
+        <option>5-10 นาที</option>
+        <option>11-30 นาที</option>
+        <option>31-60 นาที</option>
+        <option>60 นาทีขึ้นไป</option>
+      </select>
+      <select id="filterDifficulty">
+        <option value="">-- เลือกความยาก --</option>
+        <option>ง่าย</option>
+        <option>ปานกลาง</option>
+        <option>ยาก</option>
+      </select>
+      <button onclick="renderSearchResults()">ค้นหา</button>
+      <div id="searchResults"></div>
+    </div>
+  </div>
+
+  <script>
+    function showSection(sectionId) {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(sec => sec.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+
+      if (sectionId === 'history') renderRecipeHistory();
+    }
+
+    const currentUserId = 1;
+    const recipes = [];
+
+    document.getElementById('addRecipeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const newRecipe = {
+        name: form.name.value,
+        image: form.image.value,
+        ingredients: form.ingredients.value,
+        steps: form.steps.value,
+        time: form.time.value,
+        difficulty: form.difficulty.value
+      };
+
+      try {
+        const response = await fetch('http://localhost:3000/api/recipes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newRecipe)
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert('บันทึกเมนูเรียบร้อยแล้ว');
+          form.reset();
+        } else {
+          alert(result.message);
+        }
+      } catch (err) {
+        console.error('เกิดข้อผิดพลาด:', err);
+        alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+      }
+    });
+  </script>
+</body>
+</html>

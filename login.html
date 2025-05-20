@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wongnok - เข้าสู่ระบบ</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'kanit';
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 320px;
+    }
+    .login-container img {
+      width: 70px;
+      margin-bottom: 10px;
+    }
+    .login-container h2 {
+      margin-bottom: 20px;
+    }
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: 'kanit';
+    }
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #ff6600;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-family: 'kanit';
+    }
+    .login-container a {
+      display: block;
+      margin-top: 15px;
+      color: #cc5500;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="user icon">
+    <h2>เข้าสู่ระบบ</h2>
+    <form id="loginForm" action="#" method="POST">
+      <input type="text" id="username" placeholder="ชื่อผู้ใช้งาน" required>
+      <input type="password" id="password" placeholder="รหัสผ่าน" required>
+      <button type="submit">เข้าสู่ระบบ</button>
+    </form>
+    <a href="register.html">ยังไม่มีบัญชี? สมัครสมาชิก</a>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch("http://localhost:3000/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include", // ให้ cookie ติดไปกับ request
+          body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert("เข้าสู่ระบบสำเร็จ");
+          window.location.href = "member.html"; // เปลี่ยนเส้นทางไปยังหน้า member
+        } else {
+          alert("เข้าสู่ระบบไม่สำเร็จ: " + result.message);
+        }
+      } catch (err) {
+        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
