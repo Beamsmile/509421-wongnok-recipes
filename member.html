@@ -248,7 +248,76 @@
 
   const recipes = [];
 
-  
+  async function renderRecipeHistory() {
+  if (!currentUserId) return;
+  const container = document.getElementById('myRecipes');
+  container.innerHTML = '<p>กำลังโหลด...</p>';
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/recipes`, {
+      credentials: 'include'
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      if (data.length === 0) {
+        container.innerHTML = '<p>ยังไม่มีเมนู</p>';
+        return;
+      }
+
+      container.innerHTML = '';
+      data.forEach(recipe => {
+        const div = document.createElement('div');
+        div.className = 'recipe';
+        div.innerHTML = `
+          <img src="${recipe.image}" alt="${recipe.name}">
+          <h3>${recipe.name}</h3>
+          <p><strong>วัตถุดิบ:</strong> ${recipe.ingredients}</p>
+          <p><strong>ขั้นตอน:</strong> ${recipe.steps}</p>
+          <p><strong>เวลา:</strong> ${recipe.time}</p>
+          <p><strong>ความยาก:</strong> ${recipe.difficulty}</p>
+          <div class="actions">
+            <button onclick="editRecipe(${recipe.id})">แก้ไข</button>
+            <button onclick="deleteRecipe(${recipe.id})">ลบ</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    } else {
+      container.innerHTML = `<p>เกิดข้อผิดพลาด: ${data.message}</p>`;
+    }
+  } catch (err) {
+    container.innerHTML = '<p>ไม่สามารถโหลดข้อมูลเมนูได้</p>';
+    console.error(err);
+  }
+}
+
+async function deleteRecipe(id) {
+  if (!confirm('คุณต้องการลบเมนูนี้ใช่ไหม?')) return;
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/recipes/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (res.ok) {
+      alert('ลบเมนูเรียบร้อยแล้ว');
+      renderRecipeHistory();
+    } else {
+      const data = await res.json();
+      alert(data.message || 'เกิดข้อผิดพลาด');
+    }
+  } catch (err) {
+    console.error('เกิดข้อผิดพลาด:', err);
+    alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+  }
+}
+
+function editRecipe(id) {
+  // ยังไม่ทำการแก้ไขโดยตรงในแบบฟอร์มนี้ เดี๋ยวเราค่อยเพิ่ม
+  alert('ฟีเจอร์แก้ไขจะเปิดให้ใช้งานเร็ว ๆ นี้');
+}
+
   
   </script>
 </body>
