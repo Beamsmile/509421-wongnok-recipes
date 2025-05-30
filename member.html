@@ -184,6 +184,7 @@
 
   <script>
  let currentUserId = null;
+ let editingRecipeId = null;
 
   window.onload = async function () {
     try {
@@ -204,39 +205,49 @@
     }
   };
 
-  document.getElementById('addRecipeForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const form = e.target;
-    const newRecipe = {
-      name: form.name.value,
-      image: form.image.value,
-      ingredients: form.ingredients.value,
-      steps: form.steps.value,
-      time: form.time.value,
-      difficulty: form.difficulty.value
-    };
+document.getElementById('addRecipeForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const recipeData = {
+    name: form.name.value,
+    image: form.image.value,
+    ingredients: form.ingredients.value,
+    steps: form.steps.value,
+    time: form.time.value,
+    difficulty: form.difficulty.value
+  };
 
-    try {
-      const response = await fetch('http://localhost:3000/api/recipes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(newRecipe)
-      });
-      const result = await response.json();
-      if (response.ok) {
-        alert('บันทึกเมนูเรียบร้อยแล้ว');
-        form.reset();
-      } else {
-        alert(result.message);
-      }
-    } catch (err) {
-      console.error('เกิดข้อผิดพลาด:', err);
-      alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+  try {
+    let url = 'http://localhost:3000/api/recipes';
+    let method = 'POST';
+
+    if (editingRecipeId) {
+      url += `/${editingRecipeId}`;
+      method = 'PUT';
     }
-  });
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(recipeData)
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert(editingRecipeId ? 'แก้ไขเมนูเรียบร้อยแล้ว' : 'บันทึกเมนูเรียบร้อยแล้ว');
+      form.reset();
+      editingRecipeId = null;
+      renderRecipeHistory(); // รีเฟรชเมนู
+      showSection('history');
+    } else {
+      alert(result.message);
+    }
+  } catch (err) {
+    console.error('เกิดข้อผิดพลาด:', err);
+    alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+  }
+});
 
   function showSection(sectionId) {
     const sections = document.querySelectorAll('.section');
@@ -314,11 +325,31 @@ async function deleteRecipe(id) {
 }
 
 function editRecipe(id) {
-  // ยังไม่ทำการแก้ไขโดยตรงในแบบฟอร์มนี้ เดี๋ยวเราค่อยเพิ่ม
-  alert('ฟีเจอร์แก้ไขจะเปิดให้ใช้งานเร็ว ๆ นี้');
+  fetch(`http://localhost:3000/api/recipes/${id}`, {
+    credentials: 'include'
+  })
+  .then(res => res.json())
+  .then(recipe => {
+    editingRecipeId = id;
+    showSection('create'); // แสดงฟอร์มก่อน
+
+    // ต้องรอให้ฟอร์มแสดงก่อนถึงค่อยกรอกค่า (setTimeout 100ms ช่วยให้ DOM วาดเสร็จก่อน)
+    setTimeout(() => {
+      const form = document.getElementById('addRecipeForm');
+      form.name.value = recipe.name;
+      form.image.value = recipe.image;
+      form.ingredients.value = recipe.ingredients;
+      form.steps.value = recipe.steps;
+      form.time.value = recipe.time;
+      form.difficulty.value = recipe.difficulty;
+    }, 100);
+  })
+  .catch(err => {
+    console.error('ไม่สามารถโหลดเมนูสำหรับแก้ไข:', err);
+    alert('เกิดข้อผิดพลาดในการโหลดเมนู');
+  });
 }
 
-  
   </script>
 </body>
 </html>

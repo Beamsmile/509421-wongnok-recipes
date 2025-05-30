@@ -40,7 +40,7 @@ const db = mysql.createConnection({
   user: 'root',
   password: 'root',
   database: 'wongnok'
-});
+})
 
 db.connect(err => {
   if (err) {
@@ -183,6 +183,38 @@ app.post('/api/rate', async (req, res) => {
     res.status(500).json({ message: 'เกิดข้อผิดพลลาด' });
   }
 });
+
+app.get('/api/recipes/:id', async (req, res) => {
+  const userId = req.session.userId;
+  const recipeId = req.params.id;
+
+  console.log('🟡 userId:', userId);
+  console.log('🟡 recipeId:', recipeId);
+
+  if (!userId) return res.status(401).json({ message: 'กรุณาเข้าสู่ระบบ' });
+
+  try {
+    const [rows] = await db.promise().execute(
+      'SELECT * FROM recipes WHERE id = ? AND user_id = ?',
+      [recipeId, userId]
+    );
+
+    console.log('🟢 rows:', rows);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'ไม่พบเมนู' });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('🔴 เกิดข้อผิดพลาดในการโหลดเมนู:', err);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการโหลดเมนู', error: err.message });
+  }
+});
+
+
+
+
 
 // ==== เริ่มเซิร์ฟเวอร์ ====
 app.listen(port, () => {
