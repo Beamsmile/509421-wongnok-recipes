@@ -11,7 +11,7 @@ const port = 3000;
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = ['http://localhost:5500', 'http://127.0.0.1:5500'];
+    const allowedOrigins = ['http://localhost:5500'];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
