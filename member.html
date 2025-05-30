@@ -183,49 +183,73 @@
   </div>
 
   <script>
-    function showSection(sectionId) {
-      const sections = document.querySelectorAll('.section');
-      sections.forEach(sec => sec.classList.remove('active'));
-      document.getElementById(sectionId).classList.add('active');
+ let currentUserId = null;
 
-      if (sectionId === 'history') renderRecipeHistory();
-    }
-
-    const currentUserId = 1;
-    const recipes = [];
-
-    document.getElementById('addRecipeForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const newRecipe = {
-        name: form.name.value,
-        image: form.image.value,
-        ingredients: form.ingredients.value,
-        steps: form.steps.value,
-        time: form.time.value,
-        difficulty: form.difficulty.value
-      };
-
-      try {
-        const response = await fetch('http://localhost:3000/api/recipes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(newRecipe)
-        });
-        const result = await response.json();
-        if (response.ok) {
-          alert('บันทึกเมนูเรียบร้อยแล้ว');
-          form.reset();
-        } else {
-          alert(result.message);
-        }
-      } catch (err) {
-        console.error('เกิดข้อผิดพลาด:', err);
-        alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+  window.onload = async function () {
+    try {
+      const res = await fetch('http://localhost:3000/api/me', {
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        currentUserId = data.userId;
+        console.log('เข้าสู่ระบบด้วย userId:', currentUserId);
+      } else {
+        alert('กรุณาเข้าสู่ระบบก่อนใช้งานหน้านี้');
+        window.location.href = 'login.html';
       }
-    });
+    } catch (err) {
+      console.error('ไม่สามารถโหลดข้อมูล session ได้:', err);
+      alert('ไม่สามารถโหลด session ได้');
+    }
+  };
+
+  document.getElementById('addRecipeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const newRecipe = {
+      name: form.name.value,
+      image: form.image.value,
+      ingredients: form.ingredients.value,
+      steps: form.steps.value,
+      time: form.time.value,
+      difficulty: form.difficulty.value
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/api/recipes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(newRecipe)
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert('บันทึกเมนูเรียบร้อยแล้ว');
+        form.reset();
+      } else {
+        alert(result.message);
+      }
+    } catch (err) {
+      console.error('เกิดข้อผิดพลาด:', err);
+      alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+    }
+  });
+
+  function showSection(sectionId) {
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(sec => sec.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+
+    if (sectionId === 'history') renderRecipeHistory();
+  }
+
+  const recipes = [];
+
+  
+  
   </script>
 </body>
 </html>
