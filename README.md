@@ -46,5 +46,5 @@ CREATE TABLE ratings (
 
  - cd wongnok\wongnok-backend
  - node server.js
-  - วิธีการเริ่มต้น (Start) ระบบ: รันข้อมูลผ่าน (VS code Live server)
+ - วิธีการเริ่มต้น (Start) ระบบ: รันข้อมูลผ่าน (VS code Live server ด้วย http://localhost:5500/ เท่านั้น ถ้าไม่รันด้วย localhost นี้จะไม่สามารถเชื่อมต่อกับ DB ได้)
 
