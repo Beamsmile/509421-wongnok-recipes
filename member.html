@@ -393,6 +393,15 @@ async function renderSearchResults() {
           </div>
         `;
         container.appendChild(div);
+        // ⭐ แสดงดาวที่เคยให้คะแนนไว้
+        if (recipe.userRating) {
+          const stars = div.querySelectorAll('.rating span');
+          stars.forEach(star => {
+            if (parseInt(star.dataset.star) <= recipe.userRating) {
+              star.classList.add('selected');
+            }
+          });
+        }
       });
     } else {
       container.innerHTML = `<p>เกิดข้อผิดพลาด: ${data.message}</p>`;
@@ -402,6 +411,33 @@ async function renderSearchResults() {
     container.innerHTML = '<p>ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้</p>';
   }
 }
+
+
+
+function rateRecipe(recipeId, rating) {
+  if (!confirm(`คุณต้องการให้คะแนน ${rating} ดาวใช่ไหม?`)) return;
+
+  fetch('http://localhost:3000/api/rate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ recipeId, rating })
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.success) {
+      alert('ให้คะแนนสำเร็จแล้ว');
+      renderSearchResults(); // โหลดใหม่เพื่อให้ UI อัปเดต
+    } else {
+      alert(result.message || 'เกิดข้อผิดพลาดในการให้คะแนน');
+    }
+  })
+  .catch(err => {
+    console.error('เกิดข้อผิดพลาดในการส่งคะแนน:', err);
+    alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+  });
+}
+
 
 
   </script>
