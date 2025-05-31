@@ -124,10 +124,10 @@
   <div class="auth-button" onclick="window.location='login.html'" target="_blank">สมัครสมาชิก / เข้าสู่ระบบ</div>
   <header>
     <div class="header-content">
-      <div class="logo">WongNok</div>
+      <div class="logo" onclick="location.reload()">WongNok</div>
       <div class="search-bar">
         <input type="text" placeholder="ค้นหาเมนูอาหาร...">
-        <button>ค้นหา</button>
+        <button onclick="renderSearchResults()">ค้นหา</button>
       </div>
     </div>
   </header> 
@@ -148,28 +148,53 @@
     <div class="category">ของทานเล่น</div>
   </div>
 
-  <div class="section-title">เมนูแนะนำยอดนิยม</div>
+  <div class="section-title">ผลการค้นหา</div>
   <div class="popular-section">
     <div class="popular-item">
-      <h3>1. ผัดไทยกุ้งสด</h3>
-      <p>คะแนน: 4.9/5 จาก 300 รีวิว</p>
-    </div>
-    <div class="popular-item">
-      <h3>2. ต้มยำกุ้ง</h3>
-      <p>คะแนน: 4.8/5 จาก 280 รีวิว</p>
-    </div>
-    <div class="popular-item">
-      <h3>3. แกงเขียวหวานไก่</h3>
-      <p>คะแนน: 4.7/5 จาก 250 รีวิว</p>
-    </div>
-    <div class="popular-item">
-      <h3>4. ยำวุ้นเส้น</h3>
-      <p>คะแนน: 4.6/5 จาก 200 รีวิว</p>
-    </div>
-    <div class="popular-item">
-      <h3>5. ข้าวหมูกรอบ</h3>
-      <p>คะแนน: 4.5/5 จาก 180 รีวิว</p>
+
     </div>
   </div>
+
+  <script>
+  async function renderSearchResults() {
+    const query = document.querySelector('.search-bar input').value.trim();
+    if (!query) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}`, {
+        credentials: 'include'
+      });
+      const results = await response.json();
+
+      const section = document.querySelector('.popular-section');
+      section.innerHTML = ''; // ล้างของเก่า
+
+      if (!results || results.length === 0) {
+        section.innerHTML = '<p>ไม่พบเมนูอาหารที่คุณค้นหา</p>';
+        return;
+      }
+
+      results.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'popular-item';
+        div.innerHTML = `
+          <img src="${item.image}" alt="${item.name}">
+          <h3>${item.name}</h3>
+          <p><strong>วัตถุดิบ:</strong> ${item.ingredients || '-'}</p>
+          <p><strong>ขั้นตอน:</strong> ${item.steps || '-'}</p>
+          <p><strong>เวลา:</strong> ${item.time || '-'} นาที</p>
+          <p><strong>ความยาก:</strong> ${item.difficulty || '-'}</p>
+
+        `;
+        section.appendChild(div);
+      });
+
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการค้นหา:', error);
+      alert('ไม่สามารถค้นหาเมนูได้ กรุณาลองใหม่อีกครั้ง');
+    }
+  }
+</script>
+
 </body>
 </html>
