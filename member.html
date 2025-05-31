@@ -120,6 +120,7 @@
     <button onclick="showSection('create')">สร้างเมนู</button>
     <button onclick="showSection('history')">ประวัติเมนู</button>
     <button onclick="showSection('search')">ค้นหาเมนู</button>
+    <button class="auth-button" onclick="logout()">ออกจากระบบ</button>
   </div>
   <div class="main-content">
     <div id="create" class="section active">
@@ -435,6 +436,23 @@ function rateRecipe(recipeId, rating) {
   .catch(err => {
     console.error('เกิดข้อผิดพลาดในการส่งคะแนน:', err);
     alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+  });
+}
+
+function logout() {
+  fetch('http://localhost:3000/api/logout', {
+    method: 'POST',
+    credentials: 'include'
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert('ออกจากระบบเรียบร้อยแล้ว');
+      window.location.href = 'login.html'; // หรือหน้าแรก
+    }
+  })
+  .catch(err => {
+    console.error('เกิดข้อผิดพลาด:', err);
   });
 }
 

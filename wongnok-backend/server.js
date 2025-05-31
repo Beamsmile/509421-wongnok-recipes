@@ -225,6 +225,17 @@ app.get('/api/recipes/:id', async (req, res) => {
   }
 });
 
+// ==== ออกจากระบบ ====
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).json({ message: 'เกิดข้อผิดพลาดในการออกจากระบบ' });
+    }
+    res.clearCookie('connect.sid'); // เคลียร์ cookie session
+    res.json({ success: true });
+  });
+});
+
 
 // ==== เริ่มเซิร์ฟเวอร์ ====
 app.listen(port, () => {
