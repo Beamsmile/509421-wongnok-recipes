@@ -106,7 +106,7 @@
     .rating span {
       font-size: 24px;
       cursor: pointer;
-      color: #ccc;
+      color: gold;
     }
 
     .rating span.selected {
@@ -387,11 +387,12 @@ async function renderSearchResults() {
           <p><strong>ขั้นตอน:</strong> ${recipe.steps}</p>
           <p><strong>เวลา:</strong> ${recipe.time}</p>
           <p><strong>ความยาก:</strong> ${recipe.difficulty}</p>
-          <div class="rating" data-id="${recipe.id}">
+          <div><strong>ให้คะแนน:</div>
+          <spen class="rating" data-id="${recipe.id}">
             ${[1,2,3,4,5].map(star => `
               <span data-star="${star}" onclick="rateRecipe(${recipe.id}, ${star})">★</span>
             `).join('')}
-          </div>
+          </spen>
         `;
         container.appendChild(div);
         // ⭐ แสดงดาวที่เคยให้คะแนนไว้
@@ -414,7 +415,6 @@ async function renderSearchResults() {
 }
 
 
-
 function rateRecipe(recipeId, rating) {
   if (!confirm(`คุณต้องการให้คะแนน ${rating} ดาวใช่ไหม?`)) return;
 
@@ -428,7 +428,17 @@ function rateRecipe(recipeId, rating) {
   .then(result => {
     if (result.success) {
       alert('ให้คะแนนสำเร็จแล้ว');
-      renderSearchResults(); // โหลดใหม่เพื่อให้ UI อัปเดต
+
+      // ✅ อัปเดตดาวตรงนี้
+      const ratingDiv = document.querySelector(`.rating[data-id="${recipeId}"]`);
+      const stars = ratingDiv.querySelectorAll('span');
+      stars.forEach(star => {
+        const isSelected = parseInt(star.dataset.star) <= rating;
+        star.classList.toggle('selected', isSelected);
+      });
+
+      // ✅ โหลดใหม่หรือไม่ก็ได้
+      setTimeout(renderSearchResults, 1000);
     } else {
       alert(result.message || 'เกิดข้อผิดพลาดในการให้คะแนน');
     }
@@ -438,6 +448,9 @@ function rateRecipe(recipeId, rating) {
     alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
   });
 }
+
+
+
 
 function logout() {
   fetch('http://localhost:3000/api/logout', {
