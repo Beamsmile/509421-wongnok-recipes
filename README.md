@@ -7,6 +7,7 @@
 
  - ติดตั้ง Libraries express, mysql2, cors, body-parser, express-session
  - สร้างตาราง mysql
+ - **วิธีการเริ่มต้น (Start) ระบบ: รันข้อมูลผ่าน (VS code Live server ด้วย http://localhost:5500/ เท่านั้น ถ้าไม่รันด้วย localhost นี้จะไม่สามารถเชื่อมต่อกับ DB ได้ และระบบจะส่งข้อมูลไม่ได้)**
 
   CREATE DATABASE IF NOT EXISTS wongnok;
 USE wongnok;
@@ -46,5 +47,5 @@ CREATE TABLE ratings (
 
  - cd wongnok\wongnok-backend
  - node server.js
- - วิธีการเริ่มต้น (Start) ระบบ: รันข้อมูลผ่าน (VS code Live server ด้วย http://localhost:5500/ เท่านั้น ถ้าไม่รันด้วย localhost นี้จะไม่สามารถเชื่อมต่อกับ DB ได้)
+ - **วิธีการเริ่มต้น (Start) ระบบ: รันข้อมูลผ่าน (VS code Live server ด้วย http://localhost:5500/ เท่านั้น ถ้าไม่รันด้วย localhost นี้จะไม่สามารถเชื่อมต่อกับ DB ได้ และระบบจะส่งข้อมูลไม่ได้)
 
