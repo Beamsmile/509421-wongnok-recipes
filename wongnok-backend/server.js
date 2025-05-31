@@ -136,25 +136,38 @@ app.put('/api/recipes/:id', (req, res) => {
 
 // ==== ค้นหาเมนู ====
 app.get('/api/search', (req, res) => {
-  const { name, time, difficulty } = req.query;
-  let query = 'SELECT * FROM recipes WHERE 1=1';
-  const params = [];
+  const { q, name, time, difficulty } = req.query;
+  const userId = req.session.userId;
+
+  let sql = `
+    SELECT r.*, rt.rating AS user_rating
+    FROM recipes r
+    LEFT JOIN ratings rt ON r.id = rt.recipe_id AND rt.user_id = ?
+    WHERE 1=1
+  `;
+  const params = [userId];
+
+  if (q) {
+    sql += ' AND (r.name LIKE ? OR r.ingredients LIKE ? OR r.steps LIKE ?)';
+    const like = `%${q}%`;
+    params.push(like, like, like);
+  }
 
   if (name) {
-    query += ' AND name LIKE ?';
+    sql += ' AND r.name LIKE ?';
     params.push(`%${name}%`);
   }
   if (time) {
-    query += ' AND time = ?';
+    sql += ' AND r.time = ?';
     params.push(time);
   }
   if (difficulty) {
-    query += ' AND difficulty = ?';
+    sql += ' AND r.difficulty = ?';
     params.push(difficulty);
   }
 
-  db.query(query, params, (err, results) => {
-    if (err) return res.status(500).json({ error: 'ค้นหาเมนูล้มเหลว' });
+  db.query(sql, params, (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาด' });
     res.json(results);
   });
 });
@@ -211,9 +224,6 @@ app.get('/api/recipes/:id', async (req, res) => {
     res.status(500).json({ message: 'เกิดข้อผิดพลาดในการโหลดเมนู', error: err.message });
   }
 });
-
-
-
 
 
 // ==== เริ่มเซิร์ฟเวอร์ ====
